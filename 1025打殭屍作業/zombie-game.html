@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      text-align: center;
+      background-color: rgb(26, 26, 26);
+      color: rgb(110, 226, 255);
+    }
+    h3{
+      line-height: 2.5rem;
+    }
+
+
+    #game {
+      width: 900px;
+      height: 630px;
+      background: url(./img/background.jpg) no-repeat center center/cover;
+      position: relative;
+      margin: auto;
+      overflow: hidden;
+      background-color: black;
+      cursor: url(./img/hand.png)5 10, auto;
+    }
+
+    #game img {
+      width: 170px;
+      position: absolute;
+    }
+
+    .j {
+      z-index: 999;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .sunglasses {
+      height: 27px;
+      position: absolute;
+      background-image: url(./img/sunglasses.png);
+    }
+
+    #btn {
+      width: 80px;
+      height: 40px;
+      font-size: 25px;
+      color: rgb(86, 221, 255);
+      background: transparent;
+      border: 2px solid rgb(86, 221, 255);
+      border-radius: 40px;
+      cursor: pointer;
+    }
+    #btn:hover{
+      filter: hue-rotate(50deg);
+    }
+    #btn:disabled{
+      color: rgb(211, 211, 211);
+      border: 2px solid rgb(211, 211, 211);
+      cursor: auto;
+      filter:none
+    }
+  </style>
+</head>
+
+<body>
+  <div id="game"></div>
+  <h3>OOPS!不小心看到外星人的你要被探員J消除記憶了，
+    <br>你必須在J啟動記憶消除器前搶走他的墨鏡，沒有墨鏡他就不能啟動記憶消除器啦!
+  </h3>
+  <input type="button" value="GO" id="btn">
+  <br>
+  <p>目前分數 <span id="score">0</span>分</p>
+  <p>遊戲剩餘 <span id="time">0</span>秒</p>
+  <script src="./jquery-3.6.0.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    let score = 0
+    let countdown = 30
+    let timer = 0
+
+    const move = (j) => {
+      const top = `${Math.round(Math.random() * 85)}%`
+      const left = `${Math.round(Math.random() * 85)}%`
+      j.stop().animate({
+        top: top,
+        left: left
+      }, 1000, function () {
+        move(j)
+      })
+    }
+
+    $('#btn').click(function () {
+      $(this).attr('disabled', true)
+      score = 0
+      $('#score').text(score)
+      countdown = 30
+      $('#time').text(countdown)
+
+      timer = setInterval(function () {
+        countdown--
+        $('#time').text(countdown)
+        const top = `${Math.round(Math.random() * 80)}%`
+        const left = `${Math.round(Math.random() * 80)}%`
+        const j = $(`<img class="j" src="./img/agentJ.gif" style="top:${top}; left:${left}">`)
+        $("#game").append(j)
+        move(j)
+
+        if (countdown <= 0) {
+          clearInterval(timer)
+          $('#game img').remove()
+          $('#btn').attr('disabled', false)
+          if (score < 26) {
+            Swal.fire({
+              title: '時間到',
+              text: `你搶走墨鏡${score}次,被閃了太多次的你已失憶`,
+              imageUrl: 'img/Newton_Hailey.png',
+              imageWidth: 363,
+              imageHeight: 333,
+              imageAlt: '已失憶',
+            })
+          } else {
+            Swal.fire({
+              title: '時間到',
+              text: `你搶走墨鏡${score}次,成功躲過被消除記憶的命運，塊陶阿~`,
+              imageUrl: 'img/goodjpb.jpg',
+              imageWidth: 363,
+              imageHeight: 333,
+              imageAlt: '你最棒',
+            })
+          }
+        }
+      }, 1000)
+    })
+
+    $('#game').on('click', '.j', function (e) {
+      $(this).attr('src', './img/unglasses.png')
+      $(this).stop()
+      $(this).css({
+        'user-select': 'none',
+        '-webkit-user-drag': 'none',
+        'pointer-events': 'none'
+      })
+      const sunglasses = $(`<img class="sunglasses" style="top:${$(e.target).css('top')}; left:${$(e.target).css('left')}">`).fadeTo(500, 0)
+      $("#game").append(sunglasses)
+      $(this).removeClass('j').addClass('unglasses')
+      score++
+      $('#score').text(score)
+    })
+  </script>
+</body>
+
+</html>
